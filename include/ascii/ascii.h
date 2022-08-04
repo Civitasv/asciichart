@@ -84,7 +84,7 @@ public:
   /// Generate this chart.
   std::wstring Plot()
   {
-    // 1. 计算最大最小值
+    // 1. calculate min and max
     for (auto &line : _series)
     {
       for (auto &item : line)
@@ -94,10 +94,10 @@ public:
       }
     }
 
-    // 2. 计算跨度
+    // 2. calaculate range
     auto range = _max - _min;
 
-    // 3. 赋值 width 和 height
+    // 3. width and height
     int width = 0;
     for (auto &item : _series)
     {
@@ -110,22 +110,23 @@ public:
       _height = range;
     }
 
+    // calculate ratio using height and range
     auto ratio = _height / range;
 
     int min2 = std::round(_min * ratio);
     int max2 = std::round(_max * ratio);
 
-    // 4. 赋值 rows 和 cols
+    // 4. rows and cols of this chart
     auto rows = max2 - min2;
     auto cols = width;
 
-    // 5. 空初始化
+    // 5. initialize chart using empty str
     std::vector<std::vector<std::wstring>> screen(rows + 1, std::vector<std::wstring>(cols, _symbols["empty"]));
 
     // 6. axis + labels
     for (double y = min2; y <= max2; y++)
     {
-      auto label = FormatLabel(_min + (y - min2) * range / rows);
+      auto label = FormatLabel(std::round(_min + (y - min2) * range / rows));
       // vertical reverse
       screen[rows - (y - min2)][0] = Colored(label, COLOR::BLACK);
       screen[rows - (y - min2)][_offset - 1] = Colored((y == 0) ? _symbols["center"] : _symbols["axis"], COLOR::CYAN);
@@ -156,7 +157,7 @@ public:
           auto to = std::max(y0, y1);
           for (size_t y = from + 1; y < to; y++)
           {
-            screen[rows - y][i + _offset] = _symbols["vertical"];
+            screen[rows - y][i + _offset] = Colored(_symbols["vertical"], color);
           }
         }
       }
@@ -186,7 +187,7 @@ private:
 
   void InitColors()
   {
-    _colors = std::vector<std::string>{COLOR::BLACK, COLOR::RED, COLOR::GREEN};
+    _colors = std::vector<std::string>{COLOR::LIGHTBLUE, COLOR::RED, COLOR::GREEN};
   }
 
   void InitSymbols()
