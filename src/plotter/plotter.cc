@@ -1,16 +1,12 @@
-#include <array>
 #include <cmath>
 #include <iostream>
-#include <iomanip>
-#include <io.h>
-#include <fcntl.h>
 #include <vector>
 
 #include "ascii/ascii.h"
 
 int main()
 {
-  _setmode(_fileno(stdout), _O_U16TEXT);
+  setlocale(LC_ALL, "");
 
   std::vector<double> series;
   for (int i = 0; i < 200; i += 2)
