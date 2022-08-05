@@ -61,3 +61,25 @@ std::wcout  << '\n'
 ```
 
 ![multiple](images/multiple.png)
+
+### Animation
+
+```c++  
+std::vector<double> series;
+std::vector<double> series2;
+int height = 6;
+for (int i = 0; i < 100; i += 2) {
+series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
+Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
+if (i != 0) {
+    for (int j = 0; j <= height; j++) {
+    std::wcout << "\033[A\033[2K";
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+}
+std::wcout << asciichart.height(height).Plot();
+}
+```
+
+![animation](images/animation.gif)
