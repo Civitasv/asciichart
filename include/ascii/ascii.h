@@ -63,13 +63,13 @@ public:
   }
 
   /// Set symbols used to plot.
-  Asciichart &symbols(std::map<std::string, std::wstring> symbols) {
+  Asciichart &symbols(std::map<std::string, std::string> symbols) {
     _symbols = symbols;
     return *this;
   }
 
   /// Generate this chart.
-  std::wstring Plot() {
+  std::string Plot() {
     // 1. calculate min and max
     for (auto &line : _series) {
       for (auto &item : line) {
@@ -103,8 +103,8 @@ public:
     auto cols = width;
 
     // 5. initialize chart using empty str
-    std::vector<std::vector<std::wstring>> screen(
-        rows + 1, std::vector<std::wstring>(cols, _symbols["empty"]));
+    std::vector<std::vector<std::string>> screen(
+        rows + 1, std::vector<std::string>(cols, _symbols["empty"]));
 
     // 6. axis + labels
     for (double y = min2; y <= max2; y++) {
@@ -146,7 +146,7 @@ public:
   }
 
 private:
-  std::map<std::string, std::wstring> _symbols;
+  std::map<std::string, std::string> _symbols;
   std::vector<std::vector<double>> _series;
   std::vector<std::string> _colors;
 
@@ -167,21 +167,21 @@ private:
   }
 
   void InitSymbols() {
-    _symbols = {{"empty", L" "}, {"center", L"┼"},  {"axis", L"┤"},
-                {"c1", L"╶"},    {"c2", L"╴"},      {"parellel", L"─"},
-                {"down", L"╰"},  {"up", L"╭"},      {"ldown", L"╮"},
-                {"lup", L"╯"},   {"vertical", L"│"}};
+    _symbols = {{"empty", " "}, {"center", "┼"},  {"axis", "┤"},
+                {"c1", "╶"},    {"c2", "╴"},      {"parellel", "─"},
+                {"down", "╰"},  {"up", "╭"},      {"ldown", "╮"},
+                {"lup", "╯"},   {"vertical", "│"}};
   }
 
-  std::wstring FormatLabel(double x) {
-    std::wstringstream ss;
-    ss << std::setw(10) << std::setfill(L' ') << std::setprecision(2);
+  std::string FormatLabel(double x) {
+    std::stringstream ss;
+    ss << std::setw(10) << std::setfill(' ') << std::setprecision(2);
     ss << x;
     return ss.str();
   }
 
-  std::wstring Colored(std::wstring label, std::string color) {
-    return String2wstring(color) + label + String2wstring(Color::RESET);
+  std::string Colored(std::string label, std::string color) {
+    return color + label + Color::RESET;
   }
 
   std::wstring String2wstring(std::string origin) {
@@ -189,13 +189,13 @@ private:
         origin);
   }
 
-  std::wstring Print(std::vector<std::vector<std::wstring>> &screen) {
-    std::wstringstream os;
+  std::string Print(std::vector<std::vector<std::string>> &screen) {
+    std::stringstream os;
     for (auto &line : screen) {
       for (auto &item : line) {
         os << item.data();
       }
-      os << L"\n";
+      os << "\n";
     }
     return os.str();
   }

@@ -23,7 +23,7 @@ void example1() {
   }
 
   Asciichart asciichart(std::vector<std::vector<double>>{series});
-  std::wcout << asciichart.height(6).Plot();
+  std::cout << asciichart.height(6).Plot();
 }
 
 void example2() {
@@ -34,7 +34,7 @@ void example2() {
     series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
   }
   Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
-  std::wcout << asciichart.height(6).Plot();
+  std::cout << asciichart.height(6).Plot();
 }
 
 void animation() {
@@ -51,6 +51,6 @@ void animation() {
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-    std::wcout << asciichart.height(height).Plot();
+    std::cout << asciichart.height(height).Plot();
   }
 }
