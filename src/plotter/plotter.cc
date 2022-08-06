@@ -17,6 +17,7 @@ int main() {
 }
 
 void example1() {
+  using namespace ascii;
   std::vector<double> series;
   for (int i = 0; i < 100; i += 2) {
     series.push_back(15 * std::cos(i * (kPI * 8) / 120));
@@ -27,6 +28,7 @@ void example1() {
 }
 
 void example2() {
+  using namespace ascii;
   std::vector<double> series;
   std::vector<double> series2;
   for (int i = 0; i < 100; i += 2) {
@@ -38,6 +40,7 @@ void example2() {
 }
 
 void animation() {
+  using namespace ascii;
   std::vector<double> series;
   std::vector<double> series2;
   int height = 6;

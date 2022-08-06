@@ -12,6 +12,7 @@
 #include "color.h"
 #include "constants.h"
 
+namespace ascii {
 class Asciichart {
 public:
   explicit Asciichart(std::vector<double> series)
@@ -200,4 +201,5 @@ private:
     return os.str();
   }
 };
+} // namespace ascii
 #endif

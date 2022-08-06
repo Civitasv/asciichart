@@ -2,6 +2,7 @@
 #define INCLUDE_ASCII_COLOR_H_
 #include <string>
 
+namespace ascii {
 class Color {
 public:
   inline static const std::string BLACK = "\x1b[30m";
@@ -23,4 +24,5 @@ public:
   inline static const std::string WHITE = "\x1b[97m";
   inline static const std::string RESET = "\x1b[0m";
 };
+} // namespace ascii
 #endif
