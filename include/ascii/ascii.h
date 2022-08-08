@@ -11,134 +11,136 @@
 
 #include "color.h"
 #include "constants.h"
+#include "text.h"
 
 namespace ascii {
 class Asciichart {
 public:
   explicit Asciichart(std::vector<double> series)
-      : _height(kDoubleNotANumber), _min(kDoubleInfinity),
-        _max(kDoubleNegInfinity), _offset(3) {
+      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+        max_(kDoubleNegInfinity), offset_(3) {
     InitSeries(series);
-    InitColors();
+    InitStyles();
     InitSymbols();
   }
 
   explicit Asciichart(std::vector<std::vector<double>> series)
-      : _height(kDoubleNotANumber), _min(kDoubleInfinity),
-        _max(kDoubleNegInfinity), _offset(3) {
+      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+        max_(kDoubleNegInfinity), offset_(3) {
     InitSeries(series);
-    InitColors();
+    InitStyles();
     InitSymbols();
   }
 
   /// Set height of chart.
   Asciichart &height(double height) {
-    _height = height;
+    height_ = height;
     return *this;
   }
 
   /// Set colors of chart.
-  Asciichart &colors(std::vector<std::string> colors) {
-    _colors = colors;
+  Asciichart &styles(std::vector<Style> styles) {
+    styles_ = styles;
     return *this;
   }
 
   /// Set min of chart.
   /// This value will be override if larger than true min value.
   Asciichart &min(double min) {
-    _min = min;
+    min_ = min;
     return *this;
   }
 
   /// Set max of chart.
   /// This value will be override if less than true max value.
   Asciichart &max(double max) {
-    _max = max;
+    max_ = max;
     return *this;
   }
 
   /// Set offset of label.
   Asciichart &offset(size_t offset) {
-    _offset = offset;
+    offset_ = offset;
     return *this;
   }
 
   /// Set symbols used to plot.
   Asciichart &symbols(std::map<std::string, std::string> symbols) {
-    _symbols = symbols;
+    symbols_ = symbols;
     return *this;
   }
 
   /// Generate this chart.
   std::string Plot() {
     // 1. calculate min and max
-    for (auto &line : _series) {
+    for (auto &line : series_) {
       for (auto &item : line) {
-        _min = std::min(item, _min);
-        _max = std::max(item, _max);
+        min_ = std::min(item, min_);
+        max_ = std::max(item, max_);
       }
     }
 
     // 2. calaculate range
-    auto range = _max - _min;
+    auto range = max_ - min_;
 
     // 3. width and height
     int width = 0;
-    for (auto &item : _series) {
+    for (auto &item : series_) {
       width = std::max(width, (int)item.size());
     }
-    width += _offset;
+    width += offset_;
 
-    if (std::isnan(_height)) {
-      _height = range;
+    if (std::isnan(height_)) {
+      height_ = range;
     }
 
     // calculate ratio using height and range
-    auto ratio = _height / range;
+    auto ratio = height_ / range;
 
-    int min2 = std::round(_min * ratio);
-    int max2 = std::round(_max * ratio);
+    int min2 = std::round(min_ * ratio);
+    int max2 = std::round(max_ * ratio);
 
     // 4. rows and cols of this chart
     auto rows = max2 - min2;
     auto cols = width;
 
     // 5. initialize chart using empty str
-    std::vector<std::vector<std::string>> screen(
-        rows + 1, std::vector<std::string>(cols, _symbols["empty"]));
+    std::vector<std::vector<Text>> screen(
+        rows + 1, std::vector<Text>(cols, symbols_["empty"]));
 
     // 6. axis + labels
     for (double y = min2; y <= max2; y++) {
-      auto label = FormatLabel(std::round(_min + (y - min2) * range / rows));
+      auto label = FormatLabel(std::round(min_ + (y - min2) * range / rows));
       // vertical reverse
-      screen[rows - (y - min2)][0] = Colored(label, Color::BLACK);
-      screen[rows - (y - min2)][_offset - 1] = Colored(
-          (y == 0) ? _symbols["center"] : _symbols["axis"], Color::CYAN);
+      screen[rows - (y - min2)][0] =
+          Text(label, Style().fg(Foreground::From(Color::BLUE)));
+      screen[rows - (y - min2)][offset_ - 1] =
+          Text((y == 0) ? symbols_["center"] : symbols_["axis"],
+               Style().fg(Foreground::From(Color::CYAN)));
     }
 
     // 7. Content
-    for (size_t j = 0; j < _series.size(); j++) {
-      auto color = _colors[j % _colors.size()];
-      auto y0 = std::round(_series[j][0] * ratio) - min2;
+    for (size_t j = 0; j < series_.size(); j++) {
+      auto style = styles_[j % styles_.size()];
+      auto y0 = std::round(series_[j][0] * ratio) - min2;
       // vertical reverse
-      screen[rows - y0][_offset - 1] = Colored(_symbols["center"], color);
+      screen[rows - y0][offset_ - 1] = Text(symbols_["center"], style);
 
-      for (size_t i = 0; i < _series[j].size() - 1; i++) {
-        auto y0 = std::round(_series[j][i] * ratio) - min2;
-        auto y1 = std::round(_series[j][i + 1] * ratio) - min2;
+      for (size_t i = 0; i < series_[j].size() - 1; i++) {
+        auto y0 = std::round(series_[j][i] * ratio) - min2;
+        auto y1 = std::round(series_[j][i + 1] * ratio) - min2;
 
         if (y0 == y1) {
-          screen[rows - y0][i + _offset] = Colored(_symbols["parellel"], color);
+          screen[rows - y0][i + offset_] = Text(symbols_["parellel"], style);
         } else {
-          screen[rows - y1][i + _offset] =
-              Colored(y0 > y1 ? _symbols["down"] : _symbols["up"], color);
-          screen[rows - y0][i + _offset] =
-              Colored(y0 > y1 ? _symbols["ldown"] : _symbols["lup"], color);
+          screen[rows - y1][i + offset_] =
+              Text(y0 > y1 ? symbols_["down"] : symbols_["up"], style);
+          screen[rows - y0][i + offset_] =
+              Text(y0 > y1 ? symbols_["ldown"] : symbols_["lup"], style);
           auto from = std::min(y0, y1);
           auto to = std::max(y0, y1);
           for (size_t y = from + 1; y < to; y++) {
-            screen[rows - y][i + _offset] =
-                Colored(_symbols["vertical"], color);
+            screen[rows - y][i + offset_] = Text(symbols_["vertical"], style);
           }
         }
       }
@@ -147,28 +149,28 @@ public:
   }
 
 private:
-  std::map<std::string, std::string> _symbols;
-  std::vector<std::vector<double>> _series;
-  std::vector<std::string> _colors;
+  std::map<std::string, std::string> symbols_;
+  std::vector<std::vector<double>> series_;
+  std::vector<Style> styles_;
 
-  double _min;
-  double _max;
-  double _height;
-  double _offset;
+  double min_;
+  double max_;
+  double height_;
+  double offset_;
 
-  void InitSeries(std::vector<double> &series) { _series.push_back(series); }
+  void InitSeries(std::vector<double> &series) { series_.push_back(series); }
 
   void InitSeries(std::vector<std::vector<double>> &series) {
-    _series = series;
+    series_ = series;
   }
 
-  void InitColors() {
-    _colors =
-        std::vector<std::string>{Color::LIGHTBLUE, Color::RED, Color::GREEN};
+  void InitStyles() {
+    styles_ = {Style().fg(Foreground::From(Color::RED)),
+               Style().fg(Foreground::From(Color::CYAN))};
   }
 
   void InitSymbols() {
-    _symbols = {{"empty", " "}, {"center", "┼"},  {"axis", "┤"},
+    symbols_ = {{"empty", " "}, {"center", "┼"},  {"axis", "┤"},
                 {"c1", "╶"},    {"c2", "╴"},      {"parellel", "─"},
                 {"down", "╰"},  {"up", "╭"},      {"ldown", "╮"},
                 {"lup", "╯"},   {"vertical", "│"}};
@@ -181,20 +183,16 @@ private:
     return ss.str();
   }
 
-  std::string Colored(std::string label, std::string color) {
-    return color + label + Color::RESET;
-  }
-
   std::wstring String2wstring(std::string origin) {
     return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(
         origin);
   }
 
-  std::string Print(std::vector<std::vector<std::string>> &screen) {
+  std::string Print(std::vector<std::vector<Text>> &screen) {
     std::stringstream os;
     for (auto &line : screen) {
       for (auto &item : line) {
-        os << item.data();
+        os << item;
       }
       os << "\n";
     }
