@@ -183,11 +183,6 @@ private:
     return ss.str();
   }
 
-  std::wstring String2wstring(std::string origin) {
-    return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(
-        origin);
-  }
-
   std::string Print(std::vector<std::vector<Text>> &screen) {
     std::stringstream os;
     for (auto &line : screen) {

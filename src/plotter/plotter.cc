@@ -50,7 +50,7 @@ void animation() {
     Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
     if (i != 0) {
       for (int j = 0; j <= height; j++) {
-        std::wcout << "\033[A\033[2K";
+        std::cout << "\033[A\033[2K";
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }

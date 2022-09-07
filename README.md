@@ -33,9 +33,9 @@ series.push_back(15 * std::cos(i * (kPI * 8) / 120));
 }
 
 Asciichart asciichart(std::vector<std::vector<double>>{series});
-std::wcout << '\n'
-           << asciichart.height(10).Plot() // rescale to -3 ~ +3 lines
-           << '\n';
+std::cout << '\n'
+          << asciichart.height(10).Plot() // rescale to -3 ~ +3 lines
+          << '\n';
 ```
 
 ![scale](images/asciichart.png)
@@ -55,9 +55,9 @@ for (int i = 0; i < 200; i += 2)
 series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
 }
 Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
-std::wcout  << '\n'
-            << asciichart.height(6).Plot() 
-            << '\n';
+std::cout  << '\n'
+           << asciichart.height(6).Plot() 
+           << '\n';
 ```
 
 ![multiple](images/multiple.png)
@@ -74,11 +74,11 @@ series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
 Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
 if (i != 0) {
     for (int j = 0; j <= height; j++) {
-    std::wcout << "\033[A\033[2K";
+    std::cout << "\033[A\033[2K";
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
-std::wcout << asciichart.height(height).Plot();
+std::cout << asciichart.height(height).Plot();
 }
 ```
 
