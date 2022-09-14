@@ -98,7 +98,15 @@ public:
     for (auto &label_trace_pair : series_) {
       width = std::max(width, (int)label_trace_pair.second.size());
     }
-    width += offset_;
+    
+    int legend_padding = 0;
+    for (auto &label_trace_pair : series_) {
+      legend_padding = std::max(legend_padding, (int)label_trace_pair.first.length());
+    }
+
+    auto offset = offset_ + legend_padding;
+
+    width += offset;
 
     if (std::isnan(height_)) {
       height_ = range;
@@ -122,37 +130,40 @@ public:
     for (double y = min2; y <= max2; y++) {
       auto label = FormatLabel(std::round(min_ + (y - min2) * range / rows));
       // vertical reverse
-      screen[rows - (y - min2)][0] =
+      screen[rows - (y - min2)][legend_padding] =
           Text(label, Style().fg(Foreground::From(Color::BLUE)));
-      screen[rows - (y - min2)][offset_ - 1] =
+      screen[rows - (y - min2)][offset - 1] =
           Text((y == 0) ? symbols_["center"] : symbols_["axis"],
                Style().fg(Foreground::From(Color::CYAN)));
     }
 
-    // 7. Content
+    // 7. Legend
+    // TODO:
+
+    // 8. Content
     unsigned j = 0;
     for (auto &label_trace_pair : series_) {
       auto& trace = label_trace_pair.second;
       auto style = styles_[j++ % styles_.size()];
       auto y0 = std::round(trace[0] * ratio) - min2;
       // vertical reverse
-      screen[rows - y0][offset_ - 1] = Text(symbols_["center"], style);
+      screen[rows - y0][offset - 1] = Text(symbols_["center"], style);
 
       for (size_t i = 0; i < trace.size() - 1; i++) {
         auto y0 = std::round(trace[i] * ratio) - min2;
         auto y1 = std::round(trace[i + 1] * ratio) - min2;
 
         if (y0 == y1) {
-          screen[rows - y0][i + offset_] = Text(symbols_["parellel"], style);
+          screen[rows - y0][i + offset] = Text(symbols_["parellel"], style);
         } else {
-          screen[rows - y1][i + offset_] =
+          screen[rows - y1][i + offset] =
               Text(y0 > y1 ? symbols_["down"] : symbols_["up"], style);
-          screen[rows - y0][i + offset_] =
+          screen[rows - y0][i + offset] =
               Text(y0 > y1 ? symbols_["ldown"] : symbols_["lup"], style);
           auto from = std::min(y0, y1);
           auto to = std::max(y0, y1);
           for (size_t y = from + 1; y < to; y++) {
-            screen[rows - y][i + offset_] = Text(symbols_["vertical"], style);
+            screen[rows - y][i + offset] = Text(symbols_["vertical"], style);
           }
         }
       }
