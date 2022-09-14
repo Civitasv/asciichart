@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "color.h"
 #include "constants.h"
@@ -25,6 +26,15 @@ public:
   }
 
   explicit Asciichart(std::vector<std::vector<double>> series)
+      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+        max_(kDoubleNegInfinity), offset_(3) {
+    InitSeries(series);
+    InitStyles();
+    InitSymbols();
+  }
+
+  // For associating a text label with each series
+  explicit Asciichart(const std::unordered_map<std::string, std::vector<double>> &series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3) {
     InitSeries(series);
@@ -73,8 +83,8 @@ public:
   /// Generate this chart.
   std::string Plot() {
     // 1. calculate min and max
-    for (auto &line : series_) {
-      for (auto &item : line) {
+    for (auto &label_trace_pair : series_) {
+      for (auto &item : label_trace_pair.second) {
         min_ = std::min(item, min_);
         max_ = std::max(item, max_);
       }
@@ -85,8 +95,8 @@ public:
 
     // 3. width and height
     int width = 0;
-    for (auto &item : series_) {
-      width = std::max(width, (int)item.size());
+    for (auto &label_trace_pair : series_) {
+      width = std::max(width, (int)label_trace_pair.second.size());
     }
     width += offset_;
 
@@ -120,15 +130,17 @@ public:
     }
 
     // 7. Content
-    for (size_t j = 0; j < series_.size(); j++) {
-      auto style = styles_[j % styles_.size()];
-      auto y0 = std::round(series_[j][0] * ratio) - min2;
+    unsigned j = 0;
+    for (auto &label_trace_pair : series_) {
+      auto& trace = label_trace_pair.second;
+      auto style = styles_[j++ % styles_.size()];
+      auto y0 = std::round(trace[0] * ratio) - min2;
       // vertical reverse
       screen[rows - y0][offset_ - 1] = Text(symbols_["center"], style);
 
-      for (size_t i = 0; i < series_[j].size() - 1; i++) {
-        auto y0 = std::round(series_[j][i] * ratio) - min2;
-        auto y1 = std::round(series_[j][i + 1] * ratio) - min2;
+      for (size_t i = 0; i < trace.size() - 1; i++) {
+        auto y0 = std::round(trace[i] * ratio) - min2;
+        auto y1 = std::round(trace[i + 1] * ratio) - min2;
 
         if (y0 == y1) {
           screen[rows - y0][i + offset_] = Text(symbols_["parellel"], style);
@@ -150,7 +162,7 @@ public:
 
 private:
   std::map<std::string, std::string> symbols_;
-  std::vector<std::vector<double>> series_;
+  std::unordered_map<std::string, std::vector<double>> series_;
   std::vector<Style> styles_;
 
   double min_;
@@ -158,9 +170,17 @@ private:
   double height_;
   double offset_;
 
-  void InitSeries(std::vector<double> &series) { series_.push_back(series); }
+  void InitSeries(std::vector<double> &series) { series_["series 0"] = series; }
 
   void InitSeries(std::vector<std::vector<double>> &series) {
+    unsigned n = 0;
+    for (const auto& s : series)
+    {
+      series_["series " + std::to_string(n++)] = s;
+    }
+  }
+
+  void InitSeries(const std::unordered_map<std::string, std::vector<double>> &series) {
     series_ = series;
   }
 
