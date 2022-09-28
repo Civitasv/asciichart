@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "color.h"
 #include "constants.h"
@@ -25,6 +26,15 @@ public:
   }
 
   explicit Asciichart(std::vector<std::vector<double>> series)
+      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+        max_(kDoubleNegInfinity), offset_(3) {
+    InitSeries(series);
+    InitStyles();
+    InitSymbols();
+  }
+
+  // For associating a text label with each series
+  explicit Asciichart(const std::unordered_map<std::string, std::vector<double>> &series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3) {
     InitSeries(series);
@@ -58,9 +68,15 @@ public:
     return *this;
   }
 
-  /// Set offset of label.
+  /// Set offset of label from axis.
   Asciichart &offset(size_t offset) {
     offset_ = offset;
+    return *this;
+  }
+
+  /// Set padding between legend and label
+  Asciichart &legendPadding(size_t padding) {
+    legendPadding_ = padding;
     return *this;
   }
 
@@ -73,8 +89,8 @@ public:
   /// Generate this chart.
   std::string Plot() {
     // 1. calculate min and max
-    for (auto &line : series_) {
-      for (auto &item : line) {
+    for (auto &label_trace_pair : series_) {
+      for (auto &item : label_trace_pair.second) {
         min_ = std::min(item, min_);
         max_ = std::max(item, max_);
       }
@@ -85,14 +101,28 @@ public:
 
     // 3. width and height
     int width = 0;
-    for (auto &item : series_) {
-      width = std::max(width, (int)item.size());
+    for (auto &label_trace_pair : series_) {
+      width = std::max(width, (int)label_trace_pair.second.size());
     }
-    width += offset_;
+    
+    // determine width and height of legend, add to offset.
+    int legend_cols = 0, legend_rows = 0;
+    for (auto &label_trace_pair : series_) {
+      legend_rows++;
+      legend_cols = std::max(legend_cols, (int)label_trace_pair.first.length());
+    }
+
+    auto offset = offset_ + legend_cols;
+
+    width += offset;
 
     if (std::isnan(height_)) {
       height_ = range;
     }
+
+    // extend the height of the plot if we need more rows to display the legend
+    // than what the range of the data requires.
+    height_ = std::max((double)legend_rows, height_);
 
     // calculate ratio using height and range
     auto ratio = height_ / range;
@@ -112,61 +142,89 @@ public:
     for (double y = min2; y <= max2; y++) {
       auto label = FormatLabel(std::round(min_ + (y - min2) * range / rows));
       // vertical reverse
-      screen[rows - (y - min2)][0] =
+      screen[rows - (y - min2)][legend_cols] =
           Text(label, Style().fg(Foreground::From(Color::BLUE)));
-      screen[rows - (y - min2)][offset_ - 1] =
+      screen[rows - (y - min2)][offset - 1] =
           Text((y == 0) ? symbols_["center"] : symbols_["axis"],
                Style().fg(Foreground::From(Color::CYAN)));
     }
 
-    // 7. Content
-    for (size_t j = 0; j < series_.size(); j++) {
-      auto style = styles_[j % styles_.size()];
-      auto y0 = std::round(series_[j][0] * ratio) - min2;
-      // vertical reverse
-      screen[rows - y0][offset_ - 1] = Text(symbols_["center"], style);
+    // 7. Legend
+    {
+      unsigned j = 0;
+      for (auto &label_trace_pair : series_) {
+        auto style = styles_[j % styles_.size()];
+        PutString(screen, label_trace_pair.first, style, j++, 0);
+      }      
+    }
 
-      for (size_t i = 0; i < series_[j].size() - 1; i++) {
-        auto y0 = std::round(series_[j][i] * ratio) - min2;
-        auto y1 = std::round(series_[j][i + 1] * ratio) - min2;
+    // 8. Content
+    {
+      unsigned j = 0;
+      for (auto &label_trace_pair : series_) {
+        auto& trace = label_trace_pair.second;
+        auto style = styles_[j++ % styles_.size()];
+        auto y0 = std::round(trace[0] * ratio) - min2;
+        // vertical reverse
+        screen[rows - y0][offset - 1] = Text(symbols_["center"], style);
 
-        if (y0 == y1) {
-          screen[rows - y0][i + offset_] = Text(symbols_["parellel"], style);
-        } else {
-          screen[rows - y1][i + offset_] =
-              Text(y0 > y1 ? symbols_["down"] : symbols_["up"], style);
-          screen[rows - y0][i + offset_] =
-              Text(y0 > y1 ? symbols_["ldown"] : symbols_["lup"], style);
-          auto from = std::min(y0, y1);
-          auto to = std::max(y0, y1);
-          for (size_t y = from + 1; y < to; y++) {
-            screen[rows - y][i + offset_] = Text(symbols_["vertical"], style);
+        for (size_t i = 0; i < trace.size() - 1; i++) {
+          auto y0 = std::round(trace[i] * ratio) - min2;
+          auto y1 = std::round(trace[i + 1] * ratio) - min2;
+
+          if (y0 == y1) {
+            screen[rows - y0][i + offset] = Text(symbols_["parellel"], style);
+          } else {
+            screen[rows - y1][i + offset] =
+                Text(y0 > y1 ? symbols_["down"] : symbols_["up"], style);
+            screen[rows - y0][i + offset] =
+                Text(y0 > y1 ? symbols_["ldown"] : symbols_["lup"], style);
+            auto from = std::min(y0, y1);
+            auto to = std::max(y0, y1);
+            for (size_t y = from + 1; y < to; y++) {
+              screen[rows - y][i + offset] = Text(symbols_["vertical"], style);
+            }
           }
         }
-      }
+      }  
     }
+    
     return Print(screen);
   }
 
 private:
   std::map<std::string, std::string> symbols_;
-  std::vector<std::vector<double>> series_;
+  std::unordered_map<std::string, std::vector<double>> series_;
   std::vector<Style> styles_;
 
   double min_;
   double max_;
   double height_;
   double offset_;
+  size_t legendPadding_ = 10;
 
-  void InitSeries(std::vector<double> &series) { series_.push_back(series); }
+  void InitSeries(std::vector<double> &series) { series_["series 0"] = series; }
 
   void InitSeries(std::vector<std::vector<double>> &series) {
+    unsigned n = 0;
+    for (const auto& s : series)
+    {
+      series_["series " + std::to_string(n++)] = s;
+    }
+  }
+
+  void InitSeries(const std::unordered_map<std::string, std::vector<double>> &series) {
     series_ = series;
   }
 
   void InitStyles() {
     styles_ = {Style().fg(Foreground::From(Color::RED)),
-               Style().fg(Foreground::From(Color::CYAN))};
+               Style().fg(Foreground::From(Color::CYAN)),
+               Style().fg(Foreground::From(Color::PURPLE)),
+               Style().fg(Foreground::From(Color::YELLOW)),
+               Style().fg(Foreground::From(Color::WHITE)),
+               Style().fg(Foreground::From(Color::DARK_GREY)),
+    };
   }
 
   void InitSymbols() {
@@ -176,9 +234,25 @@ private:
                 {"lup", "╯"},   {"vertical", "│"}};
   }
 
+  /// Writes each character of a string into its respective cell in the
+  /// `screen` array, starting from the upper left, `row` and `col`.
+  void PutString(
+    std::vector<std::vector<Text>> &screen, 
+    const std::string& str, 
+    const Style& style, 
+    unsigned row, unsigned col) {
+    for (unsigned i = 0; i < str.length(); i++) {
+      if (str[i] == '\n') {
+        row += 1; 
+      } else {
+        screen[row][col + i] = Text(str.substr(i,1), style);        
+      }
+    }
+  }
+
   std::string FormatLabel(double x) {
     std::stringstream ss;
-    ss << std::setw(10) << std::setfill(' ') << std::setprecision(2);
+    ss << std::setw(legendPadding_) << std::setfill(' ') << std::setprecision(2);
     ss << x;
     return ss.str();
   }
