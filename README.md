@@ -62,6 +62,24 @@ std::cout  << '\n'
 
 ![multiple](images/multiple.png)
 
+### Now it support Legend
+
+```c++
+void example_legend2() {
+  using namespace ascii;
+  std::vector<double> series;
+  std::vector<double> series2;
+  for (int i = 0; i < 100; i += 2) {
+    series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+    series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
+  }
+  Asciichart asciichart({{"A", series}, {"B", series2}});
+  std::cout << asciichart.show_legend(true).height(6).Plot();
+}
+```
+
+![legend](images/legend.png)  
+
 ### Animation
 
 ```c++  

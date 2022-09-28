@@ -19,7 +19,8 @@ class Asciichart {
 public:
   explicit Asciichart(std::vector<double> series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
-        max_(kDoubleNegInfinity), offset_(3) {
+        max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
+        basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
@@ -27,7 +28,8 @@ public:
 
   explicit Asciichart(std::vector<std::vector<double>> series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
-        max_(kDoubleNegInfinity), offset_(3) {
+        max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
+        basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
@@ -37,7 +39,8 @@ public:
   explicit Asciichart(
       const std::unordered_map<std::string, std::vector<double>> &series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
-        max_(kDoubleNegInfinity), offset_(3) {
+        max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
+        basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
@@ -75,9 +78,15 @@ public:
     return *this;
   }
 
-  /// Set padding between legend and label
-  Asciichart &legendPadding(size_t padding) {
-    legendPadding_ = padding;
+  /// Set padding between legend and label.
+  Asciichart &legend_padding(size_t padding) {
+    legend_padding_ = padding;
+    return *this;
+  }
+
+  /// If show legend.
+  Asciichart &show_legend(bool show) {
+    show_legend_ = show;
     return *this;
   }
 
@@ -101,8 +110,8 @@ public:
     auto range = max_ - min_;
 
     // make basic padding as size of str(max)
-    basePadding_ = std::max(std::to_string((int)max_).length(),
-                            std::to_string((int)min_).length());
+    basic_width_of_label_ = std::max(std::to_string((int)max_).length(),
+                                     std::to_string((int)min_).length());
 
     // 3. width and height
     int width = 0;
@@ -110,11 +119,14 @@ public:
       width = std::max(width, (int)label_trace_pair.second.size());
     }
 
-    // determine width and height of legend, add to offset.
     int legend_cols = 0, legend_rows = 0;
-    for (auto &label_trace_pair : series_) {
-      legend_rows++;
-      legend_cols = std::max(legend_cols, (int)label_trace_pair.first.length());
+    if (show_legend_) {
+      // determine width and height of legend, add to offset.
+      for (auto &label_trace_pair : series_) {
+        legend_rows++;
+        legend_cols =
+            std::max(legend_cols, (int)label_trace_pair.first.length());
+      }
     }
 
     auto offset = offset_ + legend_cols;
@@ -125,8 +137,8 @@ public:
       height_ = range;
     }
 
-    // extend the height of the plot if we need more rows to display the legend
-    // than what the range of the data requires.
+    // extend the height of the plot if we need more rows to display the
+    // legend than what the range of the data requires.
     height_ = std::max((double)legend_rows, height_);
 
     // calculate ratio using height and range
@@ -154,12 +166,14 @@ public:
                Style().fg(Foreground::From(Color::CYAN)));
     }
 
-    // 7. Legend
-    {
-      unsigned j = 0;
-      for (auto &label_trace_pair : series_) {
-        auto style = styles_[j % styles_.size()];
-        PutString(screen, label_trace_pair.first, style, j++, 0);
+    if (show_legend_) {
+      // 7. Legend
+      {
+        unsigned j = 0;
+        for (auto &label_trace_pair : series_) {
+          auto style = styles_[j % styles_.size()];
+          PutString(screen, label_trace_pair.first, style, j++, 0);
+        }
       }
     }
 
@@ -206,8 +220,10 @@ private:
   double max_;
   double height_;
   double offset_;
-  size_t legendPadding_ = 10;
-  size_t basePadding_ = 0;
+  size_t legend_padding_;
+  size_t basic_width_of_label_;
+
+  bool show_legend_;
 
   void InitSeries(std::vector<double> &series) { series_["series 0"] = series; }
 
@@ -256,8 +272,9 @@ private:
 
   std::string FormatLabel(double x) {
     std::stringstream ss;
-    ss << std::setw(legendPadding_ + basePadding_) << std::setfill(' ')
-       << std::setprecision(2);
+    ss << std::setw(show_legend_ ? legend_padding_ + basic_width_of_label_
+                                 : basic_width_of_label_)
+       << std::setfill(' ') << std::setprecision(2);
     ss << x;
     return ss.str();
   }

@@ -8,11 +8,13 @@
 
 void example1();
 void example2();
+void example_legend();
+void example_legend2();
 void animation();
 
 int main() {
   setlocale(LC_ALL, "");
-  animation();
+  example_legend2();
   return 0;
 }
 
@@ -56,4 +58,28 @@ void animation() {
     }
     std::cout << asciichart.height(height).Plot();
   }
+}
+
+void example_legend() {
+  using namespace ascii;
+  std::vector<double> series;
+  std::vector<double> series2;
+  for (int i = 0; i < 100; i += 2) {
+    series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+    series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
+  }
+  Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
+  std::cout << asciichart.show_legend(true).height(6).Plot();
+}
+
+void example_legend2() {
+  using namespace ascii;
+  std::vector<double> series;
+  std::vector<double> series2;
+  for (int i = 0; i < 100; i += 2) {
+    series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+    series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
+  }
+  Asciichart asciichart({{"A", series}, {"B", series2}});
+  std::cout << asciichart.show_legend(true).height(6).Plot();
 }
