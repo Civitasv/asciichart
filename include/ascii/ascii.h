@@ -7,8 +7,8 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "color.h"
 #include "constants.h"
@@ -34,7 +34,8 @@ public:
   }
 
   // For associating a text label with each series
-  explicit Asciichart(const std::unordered_map<std::string, std::vector<double>> &series)
+  explicit Asciichart(
+      const std::unordered_map<std::string, std::vector<double>> &series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3) {
     InitSeries(series);
@@ -99,12 +100,16 @@ public:
     // 2. calaculate range
     auto range = max_ - min_;
 
+    // make basic padding as size of str(max)
+    basePadding_ = std::max(std::to_string((int)max_).length(),
+                            std::to_string((int)min_).length());
+
     // 3. width and height
     int width = 0;
     for (auto &label_trace_pair : series_) {
       width = std::max(width, (int)label_trace_pair.second.size());
     }
-    
+
     // determine width and height of legend, add to offset.
     int legend_cols = 0, legend_rows = 0;
     for (auto &label_trace_pair : series_) {
@@ -155,14 +160,14 @@ public:
       for (auto &label_trace_pair : series_) {
         auto style = styles_[j % styles_.size()];
         PutString(screen, label_trace_pair.first, style, j++, 0);
-      }      
+      }
     }
 
     // 8. Content
     {
       unsigned j = 0;
       for (auto &label_trace_pair : series_) {
-        auto& trace = label_trace_pair.second;
+        auto &trace = label_trace_pair.second;
         auto style = styles_[j++ % styles_.size()];
         auto y0 = std::round(trace[0] * ratio) - min2;
         // vertical reverse
@@ -186,9 +191,9 @@ public:
             }
           }
         }
-      }  
+      }
     }
-    
+
     return Print(screen);
   }
 
@@ -202,28 +207,30 @@ private:
   double height_;
   double offset_;
   size_t legendPadding_ = 10;
+  size_t basePadding_ = 0;
 
   void InitSeries(std::vector<double> &series) { series_["series 0"] = series; }
 
   void InitSeries(std::vector<std::vector<double>> &series) {
     unsigned n = 0;
-    for (const auto& s : series)
-    {
+    for (const auto &s : series) {
       series_["series " + std::to_string(n++)] = s;
     }
   }
 
-  void InitSeries(const std::unordered_map<std::string, std::vector<double>> &series) {
+  void InitSeries(
+      const std::unordered_map<std::string, std::vector<double>> &series) {
     series_ = series;
   }
 
   void InitStyles() {
-    styles_ = {Style().fg(Foreground::From(Color::RED)),
-               Style().fg(Foreground::From(Color::CYAN)),
-               Style().fg(Foreground::From(Color::PURPLE)),
-               Style().fg(Foreground::From(Color::YELLOW)),
-               Style().fg(Foreground::From(Color::WHITE)),
-               Style().fg(Foreground::From(Color::DARK_GREY)),
+    styles_ = {
+        Style().fg(Foreground::From(Color::RED)),
+        Style().fg(Foreground::From(Color::CYAN)),
+        Style().fg(Foreground::From(Color::PURPLE)),
+        Style().fg(Foreground::From(Color::YELLOW)),
+        Style().fg(Foreground::From(Color::WHITE)),
+        Style().fg(Foreground::From(Color::DARK_GREY)),
     };
   }
 
@@ -236,23 +243,21 @@ private:
 
   /// Writes each character of a string into its respective cell in the
   /// `screen` array, starting from the upper left, `row` and `col`.
-  void PutString(
-    std::vector<std::vector<Text>> &screen, 
-    const std::string& str, 
-    const Style& style, 
-    unsigned row, unsigned col) {
+  void PutString(std::vector<std::vector<Text>> &screen, const std::string &str,
+                 const Style &style, unsigned row, unsigned col) {
     for (unsigned i = 0; i < str.length(); i++) {
       if (str[i] == '\n') {
-        row += 1; 
+        row += 1;
       } else {
-        screen[row][col + i] = Text(str.substr(i,1), style);        
+        screen[row][col + i] = Text(str.substr(i, 1), style);
       }
     }
   }
 
   std::string FormatLabel(double x) {
     std::stringstream ss;
-    ss << std::setw(legendPadding_) << std::setfill(' ') << std::setprecision(2);
+    ss << std::setw(legendPadding_ + basePadding_) << std::setfill(' ')
+       << std::setprecision(2);
     ss << x;
     return ss.str();
   }
