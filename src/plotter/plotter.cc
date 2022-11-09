@@ -14,7 +14,7 @@ void animation();
 
 int main() {
   setlocale(LC_ALL, "");
-  example_legend2();
+  animation();
   return 0;
 }
 

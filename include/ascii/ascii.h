@@ -243,10 +243,10 @@ private:
     styles_ = {
         Style().fg(Foreground::From(Color::RED)),
         Style().fg(Foreground::From(Color::CYAN)),
-        Style().fg(Foreground::From(Color::PURPLE)),
+        Style().fg(Foreground::From(Color::MAGENTA)),
         Style().fg(Foreground::From(Color::YELLOW)),
         Style().fg(Foreground::From(Color::WHITE)),
-        Style().fg(Foreground::From(Color::DARK_GREY)),
+        Style().fg(Foreground::From(Color::BRIGHT_WHITE)),
     };
   }
 
