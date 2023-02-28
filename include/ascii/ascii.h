@@ -270,7 +270,7 @@ private:
     }
   }
 
-  std::string FormatLabel(double x) {
+  std::string FormatLabel(int x) {
     std::stringstream ss;
     ss << std::setw(show_legend_ ? legend_padding_ + basic_width_of_label_
                                  : basic_width_of_label_)
