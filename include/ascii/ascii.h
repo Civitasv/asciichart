@@ -208,7 +208,7 @@ public:
       }
     }
 
-    return Print(screen);
+    return std::move(Print(screen));
   }
 
 private:

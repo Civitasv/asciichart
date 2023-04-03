@@ -6,6 +6,7 @@
 
 #include "ascii/ascii.h"
 
+void example();
 void example1();
 void example2();
 void example3();
@@ -14,9 +15,17 @@ void example_legend2();
 void animation();
 
 int main() {
-  setlocale(LC_ALL, "");
   example3();
   return 0;
+}
+
+void example() {
+  std::stringstream ss;
+  for (int i = 0; i < 10; i++) {
+    ss << i+1 << ":::" << i * 2 << '\n';
+  }
+
+  std::cout << ss.str();
 }
 
 void example1() {
@@ -42,7 +51,6 @@ void example2() {
   std::cout << asciichart.height(6).Plot();
 }
 
-
 void example3() {
   using namespace ascii;
   std::vector<double> series;
@@ -51,7 +59,8 @@ void example3() {
   }
 
   Asciichart asciichart(std::vector<std::vector<double>>{series});
-  std::cout << asciichart.height(6).Plot();
+  auto res = asciichart.height(6).Plot();
+  std::cout << res << std::endl;
 }
 
 void animation() {
@@ -96,5 +105,3 @@ void example_legend2() {
   Asciichart asciichart({{"A", series}, {"B", series2}});
   std::cout << asciichart.show_legend(true).height(6).Plot();
 }
-
-
