@@ -216,9 +216,9 @@ private:
   std::unordered_map<std::string, std::vector<double>> series_;
   std::vector<Style> styles_;
 
+  double height_;
   double min_;
   double max_;
-  double height_;
   double offset_;
   size_t legend_padding_;
   size_t basic_width_of_label_;

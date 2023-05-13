@@ -27,8 +27,8 @@ public:
   }
 
 private:
-  Style style_;
   std::string text_;
+  Style style_;
 };
 } // namespace ascii
 #endif // !INCLUDE_ASCII_TEXT_H_
