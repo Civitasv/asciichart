@@ -1,8 +1,15 @@
 # Project Declaration
-project('asciichart', 'cpp', default_options: [
-  'cpp_std=c++17',
-  'warning_level=3'
-], version: '3.20')
+project(
+  'asciichart',
+  'cpp',
+  default_options: [
+    'cpp_std=c++17',
+    'warning_level=3'
+  ],
+  license: 'MIT',
+  meson_version: '>=0.57.0',
+  version: files('VERSION'),
+)
 
 incs = include_directories('include')
 
