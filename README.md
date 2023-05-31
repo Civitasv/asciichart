@@ -20,6 +20,7 @@ The width of the chart equals to the length of data series. The height and range
 4. min: min value.
 5. max: max value.
 6. symbols: symbols used in chart.
+7. **TODO** type: type of chart, LINE, CIRCLE.
 
 ## Examples
 
@@ -29,7 +30,7 @@ The width of the chart equals to the length of data series. The height and range
 std::vector<double> series; // range from -15 to +15
 for (int i = 0; i < 200; i += 2)
 {
-series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+  series.push_back(15 * std::cos(i * (kPI * 8) / 120));
 }
 
 Asciichart asciichart(std::vector<std::vector<double>>{series});
@@ -46,17 +47,17 @@ std::cout << '\n'
 std::vector<double> series;
 for (int i = 0; i < 200; i += 2)
 {
-series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+  series.push_back(15 * std::cos(i * (kPI * 8) / 120));
 }
 
 std::vector<double> series2;
 for (int i = 0; i < 200; i += 2)
 {
-series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
+  series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
 }
 Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
 std::cout  << '\n'
-           << asciichart.height(6).Plot() 
+           << asciichart.height(6).Plot()
            << '\n';
 ```
 
@@ -78,25 +79,26 @@ void example_legend2() {
 }
 ```
 
-![legend](images/legend.png)  
+![legend](images/legend.png)
 
 ### Animation
 
-```c++  
+```c++
 std::vector<double> series;
 std::vector<double> series2;
 int height = 6;
 for (int i = 0; i < 100; i += 2) {
-series.push_back(15 * std::cos(i * (kPI * 8) / 120));
-series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
-Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
-if (i != 0) {
+  series.push_back(15 * std::cos(i * (kPI * 8) / 120));
+  series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
+  Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
+
+  if (i != 0) {
     for (int j = 0; j <= height; j++) {
-    std::cout << "\033[A\033[2K";
+      std::cout << "\033[A\033[2K";
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-}
-std::cout << asciichart.height(height).Plot();
+  }
+  std::cout << asciichart.height(height).Plot();
 }
 ```
 
