@@ -6,7 +6,6 @@
 
 #include "ascii/ascii.h"
 
-void example();
 void example1();
 void example2();
 void example3();
@@ -15,17 +14,13 @@ void example_legend2();
 void animation();
 
 int main() {
-  animation();
+  // example1();
+  // example2();
+  // example3();
+  example_legend();
+  // example_legend2();
+  // animation();
   return 0;
-}
-
-void example() {
-  std::stringstream ss;
-  for (int i = 0; i < 10; i++) {
-    ss << i + 1 << ":::" << i * 2 << '\n';
-  }
-
-  std::cout << ss.str();
 }
 
 void example1() {
@@ -36,7 +31,7 @@ void example1() {
   }
 
   Asciichart asciichart(std::vector<std::vector<double>>{series});
-  std::cout << asciichart.height(6).Plot();
+  std::cout << asciichart.type(Asciichart::LINE).height(6).Plot();
 }
 
 void example2() {
@@ -48,7 +43,7 @@ void example2() {
     series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
   }
   Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
-  std::cout << asciichart.height(6).Plot();
+  std::cout << asciichart.type(Asciichart::LINE).height(6).Plot();
 }
 
 void example3() {
@@ -59,8 +54,7 @@ void example3() {
   }
 
   Asciichart asciichart(std::vector<std::vector<double>>{series});
-  auto res = asciichart.height(6).Plot();
-  std::cout << res << std::endl;
+  std::cout << asciichart.type(Asciichart::LINE).height(6).Plot();
 }
 
 void animation() {
@@ -74,11 +68,14 @@ void animation() {
     Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
     if (i != 0) {
       for (int j = 0; j <= height; j++) {
-        std::cout << "\033[A\033[2K";
+        std::cout << "\033[A\033[2K"; // This is used for clear previous chart
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-    std::cout << asciichart.show_legend(true).height(height).Plot();
+    std::cout << asciichart.type(Asciichart::LINE)
+                     .show_legend(true)
+                     .height(height)
+                     .Plot();
   }
 }
 
@@ -91,7 +88,8 @@ void example_legend() {
     series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
   }
   Asciichart asciichart(std::vector<std::vector<double>>{series, series2});
-  std::cout << asciichart.show_legend(true).height(6).Plot();
+  std::cout
+      << asciichart.type(Asciichart::LINE).show_legend(true).height(6).Plot();
 }
 
 void example_legend2() {
@@ -103,5 +101,6 @@ void example_legend2() {
     series2.push_back(15 * std::sin(i * ((kPI * 4) / 100)));
   }
   Asciichart asciichart({{"A", series}, {"B", series2}});
-  std::cout << asciichart.show_legend(true).height(6).Plot();
+  std::cout
+      << asciichart.type(Asciichart::LINE).show_legend(true).height(6).Plot();
 }
