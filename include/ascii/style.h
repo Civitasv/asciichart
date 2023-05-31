@@ -24,7 +24,7 @@ public:
     return *this;
   }
 
-  friend std::ostream &operator<<(std::ostream &os, Style &val) {
+  friend std::ostream &operator<<(std::ostream &os, const Style &val) {
     for (auto &item : val.decorations_) {
       os << item;
     }

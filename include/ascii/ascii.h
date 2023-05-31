@@ -17,7 +17,7 @@
 namespace ascii {
 class Asciichart {
 public:
-  explicit Asciichart(std::vector<double> series)
+  explicit Asciichart(const std::vector<double> &series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
         basic_width_of_label_(0), show_legend_(false) {
@@ -26,7 +26,7 @@ public:
     InitSymbols();
   }
 
-  explicit Asciichart(std::vector<std::vector<double>> series)
+  explicit Asciichart(const std::vector<std::vector<double>> &series)
       : height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
         basic_width_of_label_(0), show_legend_(false) {
@@ -53,7 +53,7 @@ public:
   }
 
   /// Set colors of chart.
-  Asciichart &styles(std::vector<Style> styles) {
+  Asciichart &styles(const std::vector<Style> &styles) {
     styles_ = styles;
     return *this;
   }
@@ -91,7 +91,7 @@ public:
   }
 
   /// Set symbols used to plot.
-  Asciichart &symbols(std::map<std::string, std::string> symbols) {
+  Asciichart &symbols(const std::map<std::string, std::string> &symbols) {
     symbols_ = symbols;
     return *this;
   }
@@ -225,9 +225,11 @@ private:
 
   bool show_legend_;
 
-  void InitSeries(std::vector<double> &series) { series_["series 0"] = series; }
+  void InitSeries(const std::vector<double> &series) {
+    series_["series 0"] = series;
+  }
 
-  void InitSeries(std::vector<std::vector<double>> &series) {
+  void InitSeries(const std::vector<std::vector<double>> &series) {
     unsigned n = 0;
     for (const auto &s : series) {
       series_["series " + std::to_string(n++)] = s;
@@ -279,7 +281,7 @@ private:
     return ss.str();
   }
 
-  std::string Print(std::vector<std::vector<Text>> &screen) {
+  std::string Print(const std::vector<std::vector<Text>> &screen) {
     std::stringstream os;
     for (auto &line : screen) {
       for (auto &item : line) {

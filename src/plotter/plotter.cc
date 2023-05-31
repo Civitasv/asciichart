@@ -15,7 +15,7 @@ void example_legend2();
 void animation();
 
 int main() {
-  example3();
+  animation();
   return 0;
 }
 
@@ -78,7 +78,7 @@ void animation() {
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-    std::cout << asciichart.height(height).Plot();
+    std::cout << asciichart.show_legend(true).height(height).Plot();
   }
 }
 
