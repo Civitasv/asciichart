@@ -22,7 +22,7 @@ int main() {
 void example() {
   std::stringstream ss;
   for (int i = 0; i < 10; i++) {
-    ss << i+1 << ":::" << i * 2 << '\n';
+    ss << i + 1 << ":::" << i * 2 << '\n';
   }
 
   std::cout << ss.str();
