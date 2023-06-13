@@ -24,18 +24,18 @@ public:
 
 public:
   explicit Asciichart(const std::vector<double> &series)
-      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+      : type_(LINE), height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
-        basic_width_of_label_(0), show_legend_(false), type_(LINE) {
+        basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
   }
 
   explicit Asciichart(const std::vector<std::vector<double>> &series)
-      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+      : type_(LINE), height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
-        basic_width_of_label_(0), show_legend_(false), type_(LINE) {
+        basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
@@ -44,9 +44,9 @@ public:
   // For associating a text label with each series
   explicit Asciichart(
       const std::unordered_map<std::string, std::vector<double>> &series)
-      : height_(kDoubleNotANumber), min_(kDoubleInfinity),
+      : type_(LINE), height_(kDoubleNotANumber), min_(kDoubleInfinity),
         max_(kDoubleNegInfinity), offset_(3), legend_padding_(10),
-        basic_width_of_label_(0), show_legend_(false), type_(LINE) {
+        basic_width_of_label_(0), show_legend_(false) {
     InitSeries(series);
     InitStyles();
     InitSymbols();
@@ -222,6 +222,7 @@ private:
 
     // 2. calaculate range
     auto range = max_ - min_;
+    if(range == 0) range = 1;
 
     // make basic padding as size of str(max)
     basic_width_of_label_ = std::max(std::to_string((int)max_).length(),
@@ -264,6 +265,8 @@ private:
     // 4. rows and cols of this chart
     auto rows = max2 - min2;
     auto cols = width;
+
+    if(rows == 0) rows = 1;
 
     // 5. initialize chart using empty str
     std::vector<std::vector<Text>> screen(
