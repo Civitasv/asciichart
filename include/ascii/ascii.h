@@ -222,7 +222,7 @@ private:
 
     // 2. calaculate range
     auto range = max_ - min_;
-    if(range == 0) range = 1;
+    if (range == 0) range = 1;
 
     // make basic padding as size of str(max)
     basic_width_of_label_ = std::max(std::to_string((int)max_).length(),
@@ -266,7 +266,7 @@ private:
     auto rows = max2 - min2;
     auto cols = width;
 
-    if(rows == 0) rows = 1;
+    if (rows == 0) rows = 1;
 
     // 5. initialize chart using empty str
     std::vector<std::vector<Text>> screen(
