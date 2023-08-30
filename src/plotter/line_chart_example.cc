@@ -90,14 +90,27 @@ namespace {
         << asciichart.type(Asciichart::LINE).show_legend(true).height(6).Plot();
   }
 
+  void usage(const char* p) {
+    std::cout << "usage: " << p << " [1-6]\n";
+  }
 }
 
-int main() {
-  // example1();
-  // example2();
-  // example3();
-  example_legend();
-  // example_legend2();
-  // animation();
+int main(int argc, char* argv[])
+{
+  if (argc != 2) {
+    usage(argv[0]);
+    return 1;
+  }
+
+  switch (std::stol(argv[1])) {
+  case 1: example1(); break;
+  case 2: example2(); break;
+  case 3: example3(); break;
+  case 4: example_legend(); break;
+  case 5: example_legend2(); break;
+  case 6: animation(); break;
+  default: usage(argv[0]); return 1;
+  }
+
   return 0;
 }
