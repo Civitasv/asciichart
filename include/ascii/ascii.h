@@ -191,12 +191,10 @@ private:
     }
   }
 
-  std::string FormatLabel(int x) {
+  std::string FormatLabel(double x) {
     std::stringstream ss;
-    ss << std::setw(show_legend_ ? legend_padding_ + basic_width_of_label_
-                                 : basic_width_of_label_)
-       << std::setfill(' ') << std::setprecision(2);
-    ss << x;
+    ss << std::fixed << std::setprecision(2) << std::setw(show_legend_ ? legend_padding_ + basic_width_of_label_
+                                 : basic_width_of_label_) << x;
     return ss.str();
   }
 
@@ -225,8 +223,10 @@ private:
     if (range == 0) range = 1;
 
     // make basic padding as size of str(max)
-    basic_width_of_label_ = std::max(std::to_string((int)max_).length(),
-                                     std::to_string((int)min_).length());
+    std::stringstream ss_max, ss_min;
+    ss_max << std::fixed << std::setprecision(2) << max_;
+    ss_min << std::fixed << std::setprecision(2) << min_;
+    basic_width_of_label_ = std::max(ss_max.str().length(), ss_min.str().length());
 
     // 3. width and height
     int width = 0;
@@ -274,7 +274,7 @@ private:
 
     // 6. axis + labels
     for (double y = min2; y <= max2; y++) {
-      auto label = FormatLabel(std::round(min_ + (y - min2) * range / rows));
+      auto label = FormatLabel(min_ + (y - min2) * range / rows);
       // vertical reverse
       screen[rows - (y - min2)][legend_cols] =
           Text(label, Style().fg(Foreground::From(Color::BLUE)));
